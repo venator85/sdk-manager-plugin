@@ -58,12 +58,22 @@ class PackageResolver {
   }
 
   def resolve() {
-    resolveBuildTools()
     resolvePlatformTools()
+    resolveSdkTools() // These must come after platform tools as they depend on them.
+    resolveBuildTools()
     resolveCompileVersion()
     resolveSupportLibraryRepository()
     resolvePlayServiceRepository()
     resolveEmulator()
+  }
+
+  def resolveSdkTools() {
+    log.lifecycle "Updating SDK tools to latest version..."
+
+    def code = androidCommand.update "tools"
+    if (code != 0) {
+      throw new StopExecutionException("SDK tools download failed with code $code.")
+    }
   }
 
   def resolveBuildTools() {
